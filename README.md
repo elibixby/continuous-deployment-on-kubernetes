@@ -36,7 +36,7 @@ You'll use Google Container Engine to create and manage your Kubernetes cluster.
 ```shell
 $ gcloud container clusters create cd \
   --num-nodes 3 \
-  --machine-type g1-small \
+  --machine-type n1-standard-1 \
   --scopes "https://www.googleapis.com/auth/projecthosting,https://www.googleapis.com/auth/devstorage.full_control,https://www.googleapis.com/auth/monitoring,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/compute,https://www.googleapis.com/auth/cloud-platform"
 ```
 
@@ -78,21 +78,6 @@ $ kubectl create -f kubernetes/jenkins/service_jenkins.yaml
 ```
 
 Notice that this service exposes ports `8080` and `50000` for any pods that match the `selector`. This will expose the Jenkins web UI and builder/agent registration ports within the Kubernetes cluster, but does not make them available to the public Internet. Although you could expose port `8080` to the public Internet, Kubernetes makes it simple to use nginx as a reverse proxy, providying basic authentication (and optional SSL termination). Configure that in the next section.
-
-### Create a build agent replication controller
-Now that you're running Jenkins, you'll want to run some workers that can do the build jobs assigned by Jenkins. These workers will be Kubernetes pods managed by a replication controller. The pods will be configured to have access to the Docker service on the node they're schedule on. This will allow Jenkins build jobs to be defined as Docker containers, which is super powerful and flexible.
-
-The build agent Replication Controller is defined in `kubernetes/jenkins/build_agent.yaml`. Create the controller and confirm a pod was scheduled:
-
-```shell
-$ kubectl create -f kubernetes/jenkins/build_agent.yaml
-replicationcontrollers/jenkins-builder
-
-$ kubectl get pods
-NAME                   READY     STATUS    RESTARTS   AGE
-jenkins-builder-9zttr   0/1       Pending   0          23s
-jenkins-leader-to8xg    1/1       Running   0          4h 
-```
 
 ### Create a Nginx Replication Controller and Service
 The Nginx reverse proxy will be deployed (like the Jenkins server) as a replication controller with a service. The service will have a public load balancer associated.
@@ -143,6 +128,21 @@ No events.
 Open the load balancer's IP address in your web browser and sign in with the default Jenkins username and password(`jenkins:jenkins`).
 
 ![](img/jenkins.png)
+
+### Create a build agent replication controller
+Now that you're running Jenkins, you'll want to run some workers that can do the build jobs assigned by Jenkins. These workers will be Kubernetes pods managed by a replication controller. The pods will be configured to have access to the Docker service on the node they're schedule on. This will allow Jenkins build jobs to be defined as Docker containers, which is super powerful and flexible.
+
+The build agent Replication Controller is defined in `kubernetes/jenkins/build_agent.yaml`. Create the controller and confirm a pod was scheduled:
+
+```shell
+$ kubectl create -f kubernetes/jenkins/build_agent.yaml
+replicationcontrollers/jenkins-builder
+
+$ kubectl get pods
+NAME                   READY     STATUS    RESTARTS   AGE
+jenkins-builder-9zttr   0/1       Pending   0          23s
+jenkins-leader-to8xg    1/1       Running   0          4h 
+```
 
 ### Your progress, and what's next
 You've got a Kubernetes cluster managed by Google Container Engine. You've deployed:

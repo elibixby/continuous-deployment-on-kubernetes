@@ -33,7 +33,7 @@ spec:
     spec:
       containers:
       - name: nginx-ssl-proxy
-        image: gcr.io/cloud-solutions-images/nginx-ssl-proxy:master-cc00da0 
+        image: gcr.io/cloud-solutions-images/nginx-ssl-proxy:master-cc00da0
         resources:
           limits:
             memory: "768Mi"
