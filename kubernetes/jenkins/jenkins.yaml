@@ -11,14 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-kind: ReplicationController
 apiVersion: v1
+kind: ReplicationController
 metadata:
   name: jenkins-leader
-  labels:
-    name: jenkins
-    role: leader
+labels:
+  name: jenkins
+  role: leader
 spec:
   replicas: 1
   selector:
@@ -48,3 +47,24 @@ spec:
           containerPort: 8080
         - name: jenkins-disco
           containerPort: 50000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jenkins
+labels:
+  name: jenkins
+  role: frontend
+spec:
+  ports:
+  - name: ui
+    port: 8080
+    targetPort: jenkins-http
+    protocol: TCP
+  - name: discovery
+    port: 50000
+    targetPort: jenkins-disco
+    protocol: TCP
+  selector:
+    name: jenkins
+    role: leader
